@@ -40,3 +40,15 @@ def relative_strength(prices, window_size=14):
     rsi_df.dropna()
     
     return rsi_df[3:]
+
+def macd(prices, macd_slowema_window = 26, macd_fastema_window = 12, signal_line_window = 9):
+    slow_ema = exponential_moving_average(prices,macd_slowema_window)
+    fast_ema = exponential_moving_average(prices,macd_fastema_window)
+    
+    macd_line = fast_ema.substract(slow_ema)
+    signal_line = exponential_moving_average(macd_line, signal_line_window)
+
+    return macd_line, signal_line
+    
+ 
+
