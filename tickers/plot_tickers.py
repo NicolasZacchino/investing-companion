@@ -11,6 +11,12 @@ class TickerPlot(yf.Ticker):
     def show_plot(self):
         self.plot.show()
 
+    def add_range_breaks(self):
+        self.plot.update_xaxes(rangebreaks = [
+            dict(bounds=['sat','mon']),
+            dict(values=[""])
+        ])
+
     def add_volume_plot(self):
         history = self.history(self.period)
 
@@ -20,4 +26,13 @@ class TickerPlot(yf.Ticker):
         self.plot.update_yaxes(visible=False, secondary_y=True)
 
     def add_candlestick_plot(self):
+        history = self.history(self.period)
+
+        self.plot.add_trace(go.Candlestick(x=history.index,
+        open=history['Open'],
+        high=history['High'],
+        low=history['Low'],
+        close=history['Close'],
+        ))
         pass
+
