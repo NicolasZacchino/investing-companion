@@ -1,7 +1,6 @@
 import yfinance as yf
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from analysis.Indicators import *
 
 class TickerPlot(yf.Ticker):
     def __init__(self, ticker, session=None, period='max'):
@@ -35,7 +34,7 @@ class TickerPlot(yf.Ticker):
 
     # def add_ema(self,window_size):
     #     history = self.history(self.period)
-    #     ema_plot = Indicators.exponential_moving_average(history['Close'], window_size)
+    #     ema_plot = indicators.exponential_moving_average(history['Close'], window_size)
     #     ema_name = str(window_size) + " day EMA"
     #     self.plot.add_trace(go.Scatter(x=history.index,
-    #     y = ema_plot, marker_color='blue', name = ema_name)
+    #     y = ema_plot, marker_color='blue', name = ema_name))
