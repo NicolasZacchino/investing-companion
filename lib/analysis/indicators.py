@@ -14,7 +14,7 @@ def simple_moving_average(prices, window_size = 50):
 
 def bollinger_bands(prices, sma_window = 20, stdev_window = 2):
     sma = prices.rolling(sma_window).mean()
-    stdev = sma.std()
+    stdev = prices.rolling(sma_window).std(ddof=0)
     upper_band = sma + stdev*stdev_window
     lower_band = sma - stdev*stdev_window
 
