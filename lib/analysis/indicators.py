@@ -23,30 +23,39 @@ def bollinger_bands(prices, sma_window = 20, stdev_window = 2):
     
     return bol_bands_df
 
-def relative_strength_index(prices, window_size=14):
+def relative_strength_index(prices_hist, window_size=14):
+    prices = pd.DataFrame(prices_hist)
+
+    prices['diff'] = prices.diff()
+    prices['upward'] = prices['diff'].clip(lower=0).round(2)
+    prices['downward'] = prices['diff'].clip(upper=0).abs().round(2)
     
-    up_moves = []
-    down_moves = []
-    difference = prices.diff()
+    prices['average_upward'] = prices['upward'].rolling(window_size,
+    min_periods=window_size).mean()[:window_size+1]
 
-    for i in range(len(difference)):
-        if difference[i] < 0:
-            up_moves.append(i)
-            down_moves.append(0)
-        else:
-            up_moves.append(0)
-            down_moves.append(i)
-    
-    up_moves_series = pd.Series(up_moves)
-    down_moves_series = pd.Series(down_moves).abs()
+    prices['average_downward'] = prices['downward'].rolling(window_size,
+    min_periods=window_size).mean()[:window_size+1]
 
-    up_moves_ema = exponential_moving_average(up_moves_series, window_size)
-    down_moves_ema = exponential_moving_average(down_moves_series, window_size)
-    rs = up_moves_ema/down_moves_ema
-    rsi = 100 - (100/(1+rs))
-    rsi_df = pd.DataFrame(rsi).rename(columns={rsi.columns[0]: f'RSI({window_size})'}, 
-    inplace=False).set_index(prices.index) 
+    #Calculating Wilder's Smoothing Mean (WSM)
+    #Average gains
+    for i, row in enumerate(prices['average_upward'].iloc[window_size+1:]):
+        prices['average_upward'].iloc[i+window_size+1] =\
+            (prices['average_upward'].iloc[i+window_size]*
+            (window_size-1) +
+            prices['upward'].iloc[i+window_size+1])\
+                /window_size
+    #Average Losses
+    for i, row in enumerate(prices['average_downward'].iloc[window_size+1:]):
+        prices['average_downward'].iloc[i+window_size+1] =\
+            (prices['average_downward'].iloc[i+window_size]*
+            (window_size-1) +
+            prices['downward'].iloc[i+window_size+1])\
+                /window_size
 
+    prices['rs'] = prices['average_upward']/prices['average_downward']
+    prices[f'RSI({window_size})'] = 100 - (100/(1.0+prices['rs'])) 
+
+    rsi_df = pd.DataFrame(prices[f'RSI{window_size}'])
     return rsi_df
 
 def macd(prices, macd_slowema_window = 26, macd_fastema_window = 12, signal_line_window = 9):
