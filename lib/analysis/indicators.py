@@ -24,7 +24,7 @@ def simple_moving_average(prices, window_size = 50):
 
     :returns: a Pandas dataframe with the same index as the series and a column with the moving averages
     """
-    sma_df = pd.DataFrame({f'SMA({window_size}' : prices.rolling(window_size, min_periods=window_size).mean()})
+    sma_df = pd.DataFrame({f'SMA({window_size})' : prices.rolling(window_size, min_periods=window_size).mean()})
     return sma_df
 
 
@@ -48,7 +48,7 @@ def bollinger_bands(prices, sma_window = 20, stdev_window = 2):
     
     return bol_bands_df
 
-def relative_strength_index(prices_hist, window_size=14):
+def relative_strength_index(prices_list, window_size=14):
     """
     Calculates de RSI (relative strength index) of a given series of prices with a given window size
     :param prices_hist: the series to be used
@@ -56,12 +56,13 @@ def relative_strength_index(prices_hist, window_size=14):
 
     :returns: a Pandas dataframe with the same index as the series and a column with the RSI value
     """
-    prices = pd.DataFrame(prices_hist)
-
-    prices['diff'] = prices.diff()
+    prices= pd.DataFrame(prices_list)
+    prices['diff'] = prices.diff(1)
     prices['upward'] = prices['diff'].clip(lower=0).round(2)
     prices['downward'] = prices['diff'].clip(upper=0).abs().round(2)
     
+   
+
     prices['average_upward'] = prices['upward'].rolling(window_size,
     min_periods=window_size).mean()[:window_size+1]
 
@@ -87,7 +88,7 @@ def relative_strength_index(prices_hist, window_size=14):
     prices['rs'] = prices['average_upward']/prices['average_downward']
     prices[f'RSI({window_size})'] = 100 - (100/(1.0+prices['rs'])) 
 
-    rsi_df = pd.DataFrame(prices[f'RSI{window_size}'])
+    rsi_df = pd.DataFrame(prices[f'RSI({window_size})'])
     return rsi_df
 
 def macd(prices, macd_slowema_window = 26, macd_fastema_window = 12, signal_line_window = 9):
