@@ -7,6 +7,3 @@ tsla = yf.Ticker('TSLA')
 hist = tsla.history('max')
 testdict = {indicators.exponential_moving_average: [hist['Close'], 20],
 indicators.relative_strength_index: [hist['Close'], 13], indicators.bollinger_bands: [hist['Close'], 20, 2]}
-
-bb = indicators.macd(hist['Close'])
-print(bb)

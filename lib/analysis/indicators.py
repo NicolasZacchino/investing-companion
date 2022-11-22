@@ -2,17 +2,42 @@ import pandas as pd
 import yfinance as yf
 
 def exponential_moving_average(prices, window_size = 20):
+    """
+    Calculates the exponential moving average of a given pandas series
+
+    :param prices: the series to be used
+    :param window_size: the range used in the calculation of the moving average (default = 20)
+
+    :returns: a Pandas dataframe with the same index as the series and a column with the moving averages
+
+    """
     ema_df = pd.DataFrame({f'EMA({window_size})': prices.ewm(span = window_size, 
     min_periods=window_size, adjust=False).mean()})
     return ema_df
 
 
 def simple_moving_average(prices, window_size = 50):
+    """
+    Calculates the simple moving average of a given series
+    :param prices: the series to be used
+    :param window_size: the range used in the calculations of the moving average (default=50)
+
+    :returns: a Pandas dataframe with the same index as the series and a column with the moving averages
+    """
     sma_df = pd.DataFrame({f'SMA({window_size}' : prices.rolling(window_size, min_periods=window_size).mean()})
     return sma_df
 
 
 def bollinger_bands(prices, sma_window = 20, stdev_window = 2):
+    """
+    Calculates the upper and the lower bollinger bands of a price series given the 
+    moving average range and the amount of standard deviations 
+    :param prices: the series to be used
+    :param sma_window: the range used in the calculations of the moving average (default=20)
+    :param stdev_window: How many standard deviations should be used in the calculation of the bands
+
+    :returns: a Pandas dataframe with the same index as the series and columns for the lower and upper bollinger bands
+    """
     sma = prices.rolling(sma_window).mean()
     stdev = prices.rolling(sma_window).std(ddof=0)
     upper_band = sma + stdev*stdev_window
@@ -24,6 +49,13 @@ def bollinger_bands(prices, sma_window = 20, stdev_window = 2):
     return bol_bands_df
 
 def relative_strength_index(prices_hist, window_size=14):
+    """
+    Calculates de RSI (relative strength index) of a given series of prices with a given window size
+    :param prices_hist: the series to be used
+    :param window_size: the range used in the calculations of the moving average (default=14)
+
+    :returns: a Pandas dataframe with the same index as the series and a column with the RSI value
+    """
     prices = pd.DataFrame(prices_hist)
 
     prices['diff'] = prices.diff()
@@ -59,6 +91,18 @@ def relative_strength_index(prices_hist, window_size=14):
     return rsi_df
 
 def macd(prices, macd_slowema_window = 26, macd_fastema_window = 12, signal_line_window = 9):
+    """
+    Calculates the Moving Average Convergence/Divergence (MACD) given a price series, 
+    a window size for the slow EMA, a window size for the fast EMA, and a window size for the EMA used
+    in the calculation of the signal line
+
+    :param prices: the series to be used
+    :param macd_slowema_window: the range used in the calculations of the moving average for the slow EMA (default=26)
+    :param macd_fastema_window: the range used in the calculation of the fast EMA (default=12)
+    :param signal_line_window: the range used in the calculation of the EMA for the signal line (default = 9)
+
+    :returns: a Pandas dataframe with the same index as the series and columns for the MACD value and the signal line value
+    """
     slow_ema = exponential_moving_average(prices, macd_slowema_window)
     fast_ema = exponential_moving_average(prices, macd_fastema_window)
 
