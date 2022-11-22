@@ -3,12 +3,12 @@ import yfinance as yf
 
 def exponential_moving_average(prices, window_size = 20):
     ema_df = pd.DataFrame({f'EMA({window_size})': prices.ewm(span = window_size, 
-    min_periods=1, adjust=False).mean()})
+    min_periods=window_size, adjust=False).mean()})
     return ema_df
 
 
 def simple_moving_average(prices, window_size = 50):
-    sma_df = pd.DataFrame({f'SMA({window_size}' : prices.rolling(window_size).mean()})
+    sma_df = pd.DataFrame({f'SMA({window_size}' : prices.rolling(window_size, min_periods=window_size).mean()})
     return sma_df
 
 
@@ -64,7 +64,7 @@ def macd(prices, macd_slowema_window = 26, macd_fastema_window = 12, signal_line
 
     macd_line_df_column_name = f'MACD_line{macd_slowema_window, macd_fastema_window, signal_line_window}'
     
-    macd_line_df = pd.DataFrame(slow_ema.values - fast_ema.values, 
+    macd_line_df = pd.DataFrame(fast_ema.values - slow_ema.values, 
     columns=[macd_line_df_column_name]).set_index(prices.index)
     
     signal_line_df = exponential_moving_average(macd_line_df[macd_line_df_column_name], signal_line_window)
