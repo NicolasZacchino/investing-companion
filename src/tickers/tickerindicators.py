@@ -1,7 +1,5 @@
 import yfinance as yf
-import plotly.graph_objects as go
 import pandas as pd
-from plotly.subplots import make_subplots
 from ..analysis import indicators
 
 class TickerWithIndicators(yf.Ticker):
@@ -16,14 +14,14 @@ class TickerWithIndicators(yf.Ticker):
     def __init__(self, ticker, session=None):
         super().__init__(ticker, session)
 
-    def indicators_history(self, field='Close', sma_params=[50], ema_params=[20],bollinger_params=[20,2],
+    def indicators_history(self, price_point='Close', sma_params=[50], ema_params=[20],bollinger_params=[20,2],
     rsi_params=[14],macd_params=[26,12,9], period='max'):
         """
         Creates a Pandas Dataframe with the most commonly used indicators
         (SMA, EMa, Bollinger bands, RSI, MACD)
 
-        :param field: Which price point should be used. Valid inputs = 'Close', 'Open',
-        'High', 'Low'. (Default = 'Close)
+        :param price_point: Which price point should be used. Valid inputs = 'Close', 'Open',
+        'High', 'Low', 'HL2', 'HLC3', 'HLCC4', 'OHLC4'. (Default = 'Close)
         :param sma_params: list with the numeric parameters for the SMA. (Default = [50])
         :param ema_params: list with the numeric parameters for the EMA. (Default = [20])
         :param bollinger_params: list with the numeric parameters for the bollinger bands
