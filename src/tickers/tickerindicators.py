@@ -38,15 +38,15 @@ class TickerWithIndicators(yf.Ticker):
         'calculated': ['HL2','HLC3','HLCC4','OHLC4']}
 
         #Checking if the user introduced a valid price point
-        if field not in valid_fields['calculated'] and field not in valid_fields['standard']:
+        if price_point not in valid_fields['calculated'] and price_point not in valid_fields['standard']:
             raise ValueError("Invalid price action field. Must be one of %r" %valid_fields)
         
         #If the user intoduced a pricepoint not available in history, it has to be calculated
         #with the corresponding additional_pricepoints() method
-        if field in valid_fields['standard']:
-            base_prices=self.history(period)[field]
-        if field in valid_fields['calculated']:
-            base_prices= self.additional_pricepoints(period)[field]
+        if price_point in valid_fields['standard']:
+            base_prices=self.history(period)[price_point]
+        if price_point in valid_fields['calculated']:
+            base_prices= self.additional_pricepoints(period)[price_point]
 
         sma_df = indicators.simple_moving_average(base_prices,*sma_params)
         ema_df = indicators.exponential_moving_average(base_prices, *ema_params)
