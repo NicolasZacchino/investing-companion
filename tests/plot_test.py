@@ -1,7 +1,7 @@
-from src.tickers import tickerindicators
+from investing_companion.tickers import tickerindicators
 import yfinance as yf
 import pandas as pd
-from src.analysis import indicators
+from investing_companion.indicators import indicators
 
 tsla = tickerindicators.TickerWithIndicators('ALUA.BA')
 
