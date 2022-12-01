@@ -1,6 +1,6 @@
 import pandas as pd
 
-class IndicatorBase(ABC):
+class IndicatorBase():
     '''
     Base class for the indicators. Shouldn't be used directly.
     
