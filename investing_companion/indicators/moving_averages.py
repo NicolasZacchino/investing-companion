@@ -9,19 +9,16 @@ class SimpleMovingAverage(indicators.IndicatorBase):
     :param tag: dentifier name for the instance. Not to be confused with the column names
 
     Methods:
-    get_latest_value()
     sma()
     '''
     def __init__(self, base_df, window_size=50, tag='SMA'):
         super().__init__(base_df, tag)
         self.window_size=window_size
         self.sma()
-    
-    def get_latest_value(self):
-        return self.df.iat[-1,0]
         
     def sma(self):
-        self.df['SMA'] = self.base_df.rolling(self.window_size, min_periods=self.window_size).mean()
+        self.df['SMA']=self.base_df.rolling(self.window_size, 
+                                            min_periods=self.window_size).mean()
 
 
 class ExponentialMovingAverage(indicators.IndicatorBase):
@@ -33,7 +30,6 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
     :param tag: dentifier name for the instance. Not to be confused with the column names
 
     Methods:
-    get_latest_value()
     ema()
     '''
     def __init__(self, base_df,window_size=20, name='EMA'):
@@ -41,9 +37,7 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
         self.window_size = window_size
         self.ema()
 
-    def get_latest_value(self):
-        return self.df.iat[-1,0]
-
     def ema(self):
-        self.df['EMA'] = self.df.ewm(span = self.window_size, 
-    min_periods=self.window_size, adjust=False).mean()
+        self.df['EMA']= self.df.ewm(span = self.window_size, 
+                                    min_periods=self.window_size, 
+                                    adjust=False).mean()

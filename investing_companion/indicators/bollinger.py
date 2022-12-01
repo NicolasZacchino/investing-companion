@@ -1,11 +1,22 @@
 from investing_companion import indicators
 
 class BollingerBands(indicators.IndicatorBase):
+    '''
+    Class for the Bollinger bands indicator. Inherits from IndicatorBase
+    :param base_df: the Dataframe containing the necessary data to calculate the bands
+    :param window_size: the size of the window used in the SMA calculation. Default=20
+    :param std_deviations: The amount of standard deviations used to determine the bands. Default=2
+    :param tag: Identifier name for the instance. Not to be confused with the column names
+
+    Methods:
+    bol_bands()
+    '''
     def __init__(self, base_df, window_size = 20, std_deviations=2, tag='Boll_Bands'):
         super().__init__(base_df, tag)
         self.window_size = window_size
         self.std_deviations = std_deviations
         self.bol_bands()
+        
     
     def bol_bands(self):
         sma = self.base_df.rolling(self.window_size, min_periods=self.window_size).mean()
@@ -15,11 +26,3 @@ class BollingerBands(indicators.IndicatorBase):
 
         self.df['BB_Upper'] = upper_band
         self.df['BB_Lower'] = lower_band
-
-    def get_latest_value(self, key='All'):
-        valid_keys = {'Upper','Lower','All'}
-        if key not in valid_keys:
-            raise ValueError("Invalid key, must be one of %r (Case sensitive)" %valid_keys)
-        if key == 'All':
-            return self.df.iloc[-1].to_dict()
-        return self.df[key].iat[-1]

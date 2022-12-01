@@ -9,16 +9,12 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
     :param tag: dentifier name for the instance. Not to be confused with the column names
 
     Methods:
-    get_latest_value()
     rsi()
     '''
     def __init__(self, base_df, window_size=14, tag='RSI'):
         super().__init__(base_df, tag)
         self.window_size = window_size
         self.rsi()
-    
-    def get_latest_value(self):
-        return self.df.iat[-1,0]
       
     def rsi(self):
         prices = self.base_df.copy()
@@ -29,10 +25,12 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
     
 
         prices['average_upward'] = prices['upward'].rolling(self.window_size,
-        min_periods=self.window_size).mean()[:self.window_size+1]
+                                                            min_periods=self.window_size)\
+                                                            .mean()[:self.window_size+1]
 
         prices['average_downward'] = prices['downward'].rolling(self.window_size,
-        min_periods=self.window_size).mean()[:self.window_size+1]
+                                                                min_periods=self.window_size)\
+                                                                .mean()[:self.window_size+1]
 
         #Calculating Wilder's Smoothing Mean (WSM)
         #Average gains
