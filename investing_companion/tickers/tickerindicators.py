@@ -1,6 +1,5 @@
 import yfinance as yf
 import pandas as pd
-from ..indicators import indicators
 
 class TickerWithIndicators(yf.Ticker):
     """
