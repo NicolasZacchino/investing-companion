@@ -1,4 +1,5 @@
 from investing_companion import indicators
+import pandas as pd
 
 class RelativeStrengthIndex(indicators.IndicatorBase):
     '''
@@ -17,7 +18,7 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
         self.rsi()
       
     def rsi(self):
-        prices = self.base_df.copy()
+        prices = pd.DataFrame(self.base_df)
         prices['diff'] = prices.diff(1)
         prices['upward'] = prices['diff'].clip(lower=0).round(2)
         prices['downward'] = prices['diff'].clip(upper=0).abs().round(2)

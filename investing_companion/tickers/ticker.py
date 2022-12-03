@@ -13,20 +13,12 @@ class TickerAdditionalPricepoints(yf.Ticker):
         super().__init__(ticker, session)
 
     
-    def history(self, period="1mo", interval="1d",
-                start=None, end=None, prepost=False, actions=True,
-                auto_adjust=True, back_adjust=False, repair=False, keepna=False,
-                proxy=None, rounding=False, timeout=10,
-                debug=True, raise_errors=False):
+    def history(self, *args, **kwargs):
         """
         Returns a Pandas dataframe with additional pricepoints, calculated from the 
         more commonly used Open, High, Low, and Close. Extends yf.Ticker.history()
         """
-        df = super().history(period, interval,
-                start, end, prepost, actions,
-                auto_adjust, back_adjust, repair, keepna,
-                proxy, rounding, timeout,
-                debug, raise_errors)
+        df = super().history(*args, **kwargs)
         
         price_open = df['Open']
         price_close = df['Close']
