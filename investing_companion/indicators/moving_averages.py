@@ -1,4 +1,5 @@
 from investing_companion import indicators
+import pandas as pd
 
 class SimpleMovingAverage(indicators.IndicatorBase):
     '''
@@ -11,14 +12,18 @@ class SimpleMovingAverage(indicators.IndicatorBase):
     Methods:
     sma()
     '''
-    def __init__(self, base_df, window_size=50, tag='SMA'):
-        super().__init__(base_df, tag)
+    def __init__(self, window_size=50, tag='SMA'):
+        super().__init__(tag)
         self.window_size=window_size
-        self.sma()
         
-    def sma(self):
-        self.df['SMA']=self.base_df.rolling(self.window_size, 
-                                            min_periods=self.window_size).mean()
+        
+    def build_df(self, base_df):
+        sma_name = f'SMA({self.window_size})'
+        
+        df = pd.DataFrame({sma_name: base_df.rolling(self.window_size, 
+                                                     min_periods=self.window_size).mean()})
+
+        return df
 
 
 class ExponentialMovingAverage(indicators.IndicatorBase):
@@ -32,12 +37,15 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
     Methods:
     ema()
     '''
-    def __init__(self, base_df,window_size=20, tag='EMA'):
-        super().__init__(base_df, tag)
+    def __init__(self,window_size=20, tag='EMA'):
+        super().__init__(tag)
         self.window_size = window_size
-        self.ema()
 
-    def ema(self):
-        self.df['EMA']= self.base_df.ewm(span = self.window_size, 
-                                    min_periods=self.window_size, 
-                                    adjust=False).mean()
+    def build_df(self, base_df):
+        ema_name = f'EMA({self.window_size})'
+
+        df = pd.DataFrame({ema_name: base_df.ewm(span = self.window_size, 
+                                                 min_periods=self.window_size, 
+                                                 adjust=False).mean()})
+
+        return df
