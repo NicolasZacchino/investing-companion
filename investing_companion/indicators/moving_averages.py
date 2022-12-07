@@ -10,17 +10,21 @@ class SimpleMovingAverage(indicators.IndicatorBase):
     :param tag: dentifier name for the instance. Not to be confused with the column names
 
     Methods:
-    sma()
+    set_column_names()
+    build_df()
     '''
     def __init__(self, window_size=50, tag='SMA'):
         super().__init__(tag)
         self.window_size=window_size
-        
-        
-    def build_df(self, base_df):
-        sma_name = f'SMA({self.window_size})'
-        
-        df = pd.DataFrame({sma_name: base_df.rolling(self.window_size, 
+        self.set_column_names()
+
+
+    def set_column_names(self):
+        self.sma_name = f'SMA({self.window_size})'
+
+
+    def build_df(self, base_df): 
+        df = pd.DataFrame({self.sma_name: base_df.rolling(self.window_size, 
                                                      min_periods=self.window_size).mean()})
 
         return df
@@ -35,16 +39,21 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
     :param tag: dentifier name for the instance. Not to be confused with the column names
 
     Methods:
-    ema()
+    set_column_names()
+    build_df()
     '''
     def __init__(self,window_size=20, tag='EMA'):
         super().__init__(tag)
         self.window_size = window_size
+        self.set_column_names()
+
+
+    def set_column_names(self):
+        self.ema_name = f'EMA({self.window_size})'
+
 
     def build_df(self, base_df):
-        ema_name = f'EMA({self.window_size})'
-
-        df = pd.DataFrame({ema_name: base_df.ewm(span = self.window_size, 
+        df = pd.DataFrame({self.ema_name: base_df.ewm(span = self.window_size, 
                                                  min_periods=self.window_size, 
                                                  adjust=False).mean()})
 

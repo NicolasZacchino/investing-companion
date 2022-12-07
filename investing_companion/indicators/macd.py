@@ -12,6 +12,7 @@ class MACD(indicators.IndicatorBase):
 
     Methods:
     build_df()
+    set_column_names()
     '''
     def __init__(self, 
                  slowema_window=26, 
@@ -23,6 +24,12 @@ class MACD(indicators.IndicatorBase):
         self.slowema_window = slowema_window
         self.fastema_window = fastema_window
         self.signal_window = signal_window
+        self.set_column_names()
+
+    def set_column_names(self):
+        self.macd_name = f'MACD{(self.slowema_window, self.fastema_window, self.signal_window)}'
+        self.signal_name = f'MACD Signal{(self.slowema_window, self.fastema_window, self.signal_window)}'
+        self.histogram_name = f'MACD Hist.{(self.slowema_window, self.fastema_window, self.signal_window)}'
         
 
     def build_df(self, base_df):
@@ -40,13 +47,11 @@ class MACD(indicators.IndicatorBase):
                                     min_periods=self.signal_window, 
                                     adjust=False).mean()
 
-        macd_name = f'MACD{(self.slowema_window, self.fastema_window, self.signal_window)}'
-        signal_name = f'MACD Signal{(self.slowema_window, self.fastema_window, self.signal_window)}'
-        histogram_name = f'MACD Hist.{(self.slowema_window, self.fastema_window, self.signal_window)}'
         
-        df = pd.DataFrame({macd_name: macd_line,
-                           signal_name: signal_line, 
-                           histogram_name: macd_line-signal_line})
+        
+        df = pd.DataFrame({self.macd_name: macd_line,
+                           self.signal_name: signal_line, 
+                           self.histogram_name: macd_line-signal_line})
         
         return df
 

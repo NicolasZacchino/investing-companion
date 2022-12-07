@@ -10,13 +10,20 @@ class BollingerBands(indicators.IndicatorBase):
     :param tag: Identifier name for the instance. Not to be confused with the column names
 
     Methods:
-    bol_bands()
+    set_column_names()
+    build_df()
     '''
     def __init__(self, window_size = 20, std_deviations=2, tag='Boll_Bands'):
         super().__init__(tag)
         self.window_size = window_size
         self.std_deviations = std_deviations
-        
+        self.set_column_names()
+
+
+    def set_column_names(self):
+        self.upper_column_name = f'BB_Upper{(self.window_size, self.std_deviations)}'
+        self.lower_column_name = f'BB_Lower{(self.window_size,self.std_deviations)}'
+
     
     def build_df(self, base_df):
         sma = base_df.rolling(self.window_size, min_periods=self.window_size).mean()
@@ -24,10 +31,9 @@ class BollingerBands(indicators.IndicatorBase):
         upper_band = sma + stdev*self.std_deviations
         lower_band = sma - stdev*self.std_deviations
 
-        upper_column_name = f'BB_Upper{(self.window_size, self.std_deviations)}'
-        lower_column_name = f'BB_Lower{(self.window_size,self.std_deviations)}'
+        
 
-        df = pd.DataFrame({upper_column_name: upper_band,
-                           lower_column_name: lower_band,})
+        df = pd.DataFrame({self.upper_column_name: upper_band,
+                           self.lower_column_name: lower_band,})
 
         return df

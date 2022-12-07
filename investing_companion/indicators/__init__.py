@@ -14,7 +14,11 @@ class IndicatorBase():
     def __init__(self,tag=str()):
         self.tag = tag
 
+    def set_column_names(self):
+        pass
+
     def set_parameters(self, *args, **kwargs):
         for key, val in kwargs.items():
             if key in self.__dict__:
                 self.__setattr__(key, val)
+        self.set_column_names()

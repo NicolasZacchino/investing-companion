@@ -1,45 +1,42 @@
 import pandas as pd
 import numpy as np
-from abc import ABC, abstractmethod
+from enum import Enum
 
-class BaseStrategy(ABC):
-    _BUY_SIGNAL = 1
-    _SELL_SIGNAL = -1
-    _NONE_SIGNAL = 0
+class Signal(Enum):
+    BUY = 1
+    SELL = -1
+    NONE = 0
 
-    def __init__(self, buy_cond, sell_cond):
-        self.buy_conds = buy_cond
-        self.sell_conds = sell_cond
+def prepare_data(ticker_df, indicator_list):
+    df_list = [ind.build_df(ticker_df) for ind in indicator_list]
+    df_list.insert(0,ticker_df)
+    data = pd.concat(df_list, axis=1)
+    data = pd.concat(df_list,axis=1)
+    data['daily_returns'] = np.log(data['Close']/data['Close'].shift(1))
+    data['bnh_returns'] = data['daily_returns'].cumsum()
+    data.dropna()
 
-    def prepare_data(self, ticker):
-        self.data = ticker.history('max')['Close']
-        self.data['daily_returns'] = np.log(self.data['Close']/self.data['Close'].shift(1))
-        self.data['bnh_returns'] = self.data['daily_returns'].cumsum()
-        self.data.dropna()
+    return data
 
-    def backtest_strategy(self):
-      
-        #Set Buy and sell signals
-        self.data['signal'] =np.select([self.buy_conds, self.sell_conds], 
-                                       [self._BUY_SIGNAL, self._SELL_SIGNAL],
-                                        self._NONE_SIGNAL)
 
-        self.data['position'] = self.data['signal'].replace(to_replace=self._NONE_SIGNAL, method='ffill')
-        self.data['position'] = self.data['position'].shift()
+def backtest_strategy(data, buy_conds, sell_conds):   
+    #Set Buy and sell signals
+    data['signal'] =np.select([buy_conds, sell_conds], 
+                                   [Signal.BUY.value, Signal.SELL.value],
+                                    Signal.NONE.value)
 
-        self.data['strat_returns'] = self.data['position'] * self.data['daily_returns']
+    data['position'] = data['signal'].replace(to_replace=Signal.NONE.value, method='ffill')
+    data['position'] = data['position'].shift()
+    data['strat_returns'] = data['position'] * data['daily_returns']
 
-        performance = self.data[['daily_returns','strat_returns']]\
-                                .iloc[:].sum()
-        
-        self.data['strat_returns'] = self.data['strat_returns'].cumsum()
-        return performance
-
-    @abstractmethod
-    def optimize_strategy(self, *args, **kwargs):
-        pass
-
+    performance = data[['daily_returns','strat_returns']]\
+                            .iloc[:].sum()
     
-    
+    data['strat_returns'] = data['strat_returns'].cumsum()
+    return performance
 
-    
+
+def optimize_indic_parameters(window, *args, **kwargs):
+    pass
+
+

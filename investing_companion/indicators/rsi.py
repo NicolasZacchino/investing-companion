@@ -11,11 +11,19 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
 
     Methods:
     rsi()
+    set_column_names()
+    build_df()
     '''
     def __init__(self, window_size=14, tag='RSI'):
         super().__init__(tag)
         self.window_size = window_size
-      
+        self.set_column_names()
+
+
+    def set_column_names(self):
+        self.rsi_name = f'RSI({self.window_size})'
+
+
     def build_df(self, base_df):
         df = pd.DataFrame(index=base_df.index)
         df['diff'] = base_df.diff(1)
@@ -49,9 +57,9 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
                     /self.window_size
 
         df['rs'] = df['average_upward']/df['average_downward']
-        rsi_name = f'RSI({self.window_size})'
+        
 
-        df[rsi_name] = 100 - (100/(1.0+df['rs'])) 
-        df = df[[rsi_name]]
+        df[self.rsi_name] = 100 - (100/(1.0+df['rs'])) 
+        df = df[[self.rsi_name]]
 
         return df
