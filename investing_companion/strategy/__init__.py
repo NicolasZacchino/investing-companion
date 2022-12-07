@@ -10,22 +10,30 @@ class BaseStrategy(ABC):
     def __init__(self, buy_cond, sell_cond):
         self.buy_conds = buy_cond
         self.sell_conds = sell_cond
-    
 
-    def backtest_strategy(self, ticker):
-        strat_df = ticker.history('max')[['Close']]
-        strat_df['b&h'] = np.log(strat_df['Close']/strat_df['Close'].shift(1))
-        strat_df['signal'] =np.select([self.buy_conds, self.sell_conds], 
-                                      [self._BUY_SIGNAL, self._SELL_SIGNAL],
-                                      self._NONE_SIGNAL)
+    def prepare_data(self, ticker):
+        self.data = ticker.history('max')['Close']
+        self.data['daily_returns'] = np.log(self.data['Close']/self.data['Close'].shift(1))
+        self.data['bnh_returns'] = self.data['daily_returns'].cumsum()
+        self.data.dropna()
 
-        strat_df['position'] = strat_df['signal'].replace(to_replace=self._NONE_SIGNAL, method='ffill')
-        strat_df['position'].shift(1)
-        strat_df['returns'] = strat_df['b&h'] * strat_df['position']
+    def backtest_strategy(self):
+      
+        #Set Buy and sell signals
+        self.data['signal'] =np.select([self.buy_conds, self.sell_conds], 
+                                       [self._BUY_SIGNAL, self._SELL_SIGNAL],
+                                        self._NONE_SIGNAL)
 
-        buy_hold_returns = strat_df['b&h'].cumsum()[-1]
-        strat_return = strat_df['returns'].cumsum()[-1]
-        return buy_hold_returns, strat_return
+        self.data['position'] = self.data['signal'].replace(to_replace=self._NONE_SIGNAL, method='ffill')
+        self.data['position'] = self.data['position'].shift()
+
+        self.data['strat_returns'] = self.data['position'] * self.data['daily_returns']
+
+        performance = self.data[['daily_returns','strat_returns']]\
+                                .iloc[:].sum()
+        
+        self.data['strat_returns'] = self.data['strat_returns'].cumsum()
+        return performance
 
     @abstractmethod
     def optimize_strategy(self, *args, **kwargs):
