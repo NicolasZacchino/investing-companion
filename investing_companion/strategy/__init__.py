@@ -28,22 +28,6 @@ class BaseStrategy(ABC):
     def backtest_strategy(self):
         pass
 
-    # def backtest_strategy(data, buy_conds, sell_conds):   
-    #         #Set Buy and sell signals
-    #         data['signal'] =np.select([buy_conds, sell_conds], 
-    #                                     [Signal.BUY.value, Signal.SELL.value],
-    #                                         Signal.NONE.value)
-
-    #         data['position'] = data['signal'].replace(to_replace=Signal.NONE.value, method='ffill')
-    #         data['position'] = data['position'].shift()
-    #         data['strat_returns'] = data['position'] * data['daily_returns']
-
-    #         performance = data[['daily_returns','strat_returns']]\
-    #                                 .iloc[:].sum()
-            
-    #         data['strat_returns'] = data['strat_returns'].cumsum()
-    #         return performance
-
     @abstractmethod
     def optimize_indic_parameters(self):
         pass
