@@ -20,6 +20,10 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
         self.set_column_names()
 
 
+    def __str__(self):
+        return f'RSI{(self.window_size)}'
+
+
     def set_column_names(self):
         self.rsi_name = f'RSI({self.window_size})'
 
@@ -29,8 +33,6 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
         df['diff'] = base_df.diff(1)
         df['upward'] = df['diff'].clip(lower=0).round(2)
         df['downward'] = df['diff'].clip(upper=0).abs().round(2)
-        
-    
 
         df['average_upward'] = df['upward'].rolling(self.window_size,
                                                     min_periods=self.window_size)\
@@ -57,9 +59,7 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
                     /self.window_size
 
         df['rs'] = df['average_upward']/df['average_downward']
-        
-
+    
         df[self.rsi_name] = 100 - (100/(1.0+df['rs'])) 
         df = df[[self.rsi_name]]
-
         return df

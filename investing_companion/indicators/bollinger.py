@@ -20,6 +20,10 @@ class BollingerBands(indicators.IndicatorBase):
         self.set_column_names()
 
 
+    def __str__(self):
+        return f'BB{(self.window_size,self.std_deviations)}'
+
+
     def set_column_names(self):
         self.upper_column_name = f'BB_Upper{(self.window_size, self.std_deviations)}'
         self.lower_column_name = f'BB_Lower{(self.window_size,self.std_deviations)}'

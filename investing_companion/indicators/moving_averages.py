@@ -19,6 +19,10 @@ class SimpleMovingAverage(indicators.IndicatorBase):
         self.set_column_names()
 
 
+    def __str__(self):
+        return f'SMA{(self.window_size)}'
+
+
     def set_column_names(self):
         self.sma_name = f'SMA({self.window_size})'
 
@@ -26,7 +30,6 @@ class SimpleMovingAverage(indicators.IndicatorBase):
     def build_df(self, base_df): 
         df = pd.DataFrame({self.sma_name: base_df.rolling(self.window_size, 
                                                      min_periods=self.window_size).mean()})
-
         return df
 
 
@@ -48,6 +51,10 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
         self.set_column_names()
 
 
+    def __str__(self) -> str:
+        return f'EMA{(self.window_size)}'
+
+
     def set_column_names(self):
         self.ema_name = f'EMA({self.window_size})'
 
@@ -56,5 +63,4 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
         df = pd.DataFrame({self.ema_name: base_df.ewm(span = self.window_size, 
                                                  min_periods=self.window_size, 
                                                  adjust=False).mean()})
-
         return df
