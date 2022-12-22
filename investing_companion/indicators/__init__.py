@@ -1,18 +1,19 @@
-import pandas as pd
 
 class IndicatorBase():
     '''
     Base class for the indicators. Shouldn't be used directly.
-    
-    :param base_df: the pandas dataframe that contains the data to be used in the calculation of 
-    the indicator
-    :param tag: string meant to identify the indicator. not to be confused with the column names
+
+    :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
+    :param tag(str): string meant to identify the indicator. not to be confused with the column names
 
     Methods:
-    set_parameters()
+    :set_parameters(): When seeking to change the column names, call this one instead of modifying
+    the instance variable directly as it also calls set_column_names()
+    :set_column_names(): To be implemented by the child classes
     '''
-    def __init__(self,tag=str()):
+    def __init__(self,price_point='Close',tag=str()):
         self.tag = tag
+        self.price_point = price_point
 
     def set_column_names(self):
         pass

@@ -5,23 +5,23 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
     '''
     The Class used to calculate the RSI indicator. Inherits from IndicatorBase.
 
-    :param: base_df: The Dataframe which contains the data needed for RSI calculation
-    :param: window_size: the window size for the RSI. Default=14
-    :param tag: dentifier name for the instance. Not to be confused with the column names
-
+    :param: window_size(int): the window size for the RSI. Default=14
+    :param tag(str): dentifier name for the instance. Not to be confused with the column names
+    :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
+    
     Methods:
-    rsi()
-    set_column_names()
-    build_df()
+    :rsi()
+    :set_column_names()
+    :build_df()
     '''
-    def __init__(self, window_size=14, tag='RSI'):
-        super().__init__(tag)
+    def __init__(self, window_size=14, price_point='Close', tag='RSI'):
+        super().__init__(price_point,tag)
         self.window_size = window_size
         self.set_column_names()
 
 
     def __str__(self):
-        return f'RSI{(self.window_size)}'
+        return f'RSI{(self.window_size)} (Evaluated on: {self.price_point})'
 
 
     def set_column_names(self):
@@ -30,7 +30,7 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
 
     def build_df(self, base_df):
         df = pd.DataFrame(index=base_df.index)
-        df['diff'] = base_df.diff(1)
+        df['diff'] = base_df[self.price_point].diff(1)
         df['upward'] = df['diff'].clip(lower=0).round(2)
         df['downward'] = df['diff'].clip(upper=0).abs().round(2)
 
