@@ -52,7 +52,6 @@ class MACD(indicators.IndicatorBase):
         macd_line = fast_ema.subtract(slow_ema)
 
         ppo_value = (fast_ema.subtract(slow_ema)).div(slow_ema).multiply(100)
-        print(ppo_value)
 
         signal_line = macd_line.ewm(span=self.signal_window,
                                     min_periods=self.signal_window, 

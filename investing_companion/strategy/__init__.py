@@ -27,9 +27,9 @@ class BaseStrategy(ABC):
     
     def retrieve_data(self, symbol, period, start=None, end=None):
         if start is not None and end is not None:
-            self.data = yf.download(symbol, start=start, end=end)
+            self.data = yf.Ticker(symbol).history(start=start, end=end)
         else:
-            self.data = yf.download(symbol, period=period)
+            self.data = yf.Ticker(symbol).history(period=period)
 
 
     def prepare_data(self):
@@ -37,12 +37,13 @@ class BaseStrategy(ABC):
         self.data['bnh_returns'] = self.data['daily_returns'].cumsum()
         self.data.dropna(inplace=True)
 
+
     @abstractmethod
     def backtest_strategy(self):
         pass
 
     @abstractmethod
-    def optimize_indic_parameters(self):
+    def optimize_strat_params(self):
         pass
 
 
