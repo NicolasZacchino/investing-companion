@@ -22,9 +22,11 @@ while n < 20:
         strat = macd_strategy.Macd_Strategy(symbol,ppo_threshold=x)
         perf = strat.backtest_strategy(method)['strat_returns']
         reslist[x] = perf
-    
+      
     m = min(reslist.values())
     print(reslist)
+    if reslist[xlow] > reslist[xmid] and reslist [xhigh] > reslist[xmid]:
+        break
     reslist = {key:value for key,value in reslist.items() if reslist[key] != m}
     interval[0] = min(reslist.keys())
     interval[1] = max(reslist.keys())

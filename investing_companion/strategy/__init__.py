@@ -2,6 +2,9 @@ import numpy as np
 import yfinance as yf
 from abc import ABC, abstractmethod
 
+def bisection_optimization():
+    return
+
 class BaseStrategy(ABC):
     '''Base class for strategy implementation
     :param symbol(str): The ticker symbol, passed as a string
