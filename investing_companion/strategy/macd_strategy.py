@@ -3,6 +3,7 @@ from investing_companion import strategy
 import pandas as pd
 import numpy as np
 from enum import Enum, auto
+from tqdm import tqdm, trange
 
 class Macd_Strategy(strategy.BaseStrategy):
     '''MACD-based strategy class. Inherits from BaseStrategy
@@ -58,25 +59,25 @@ class Macd_Strategy(strategy.BaseStrategy):
         
 
     def backtest_strategy(self, start=None):
-        def buffer_all(i):
-            return i.all()
+        # def buffer_all(i):
+        #     return i.all()
         
         if start is None:
             start = max([self.macd.slowema_window, self.macd.signal_window])
-
+        
         if self.method == self.Method.SIGNAL_CROSSOVER:
         #buy if macd>signal for self.buffer periods. Sell if the opposite happens
         #In all cases we check if a crossing has happened with .shift()
             buy_sig = (self.data[self.macd.macd_name] > 
                       self.data[self.macd.signal_name])\
-                      .rolling(self.buffer).apply(buffer_all).fillna(0).astype(bool)
+                      .rolling(self.buffer).apply(self.buffer_all).fillna(0).astype(bool)
 
             cross_buy_sig = (self.data[self.macd.macd_name].shift(self.buffer) <= 
                              self.data[self.macd.signal_name].shift(self.buffer-1))
            
             sell_sig = (self.data[self.macd.macd_name] < 
                         self.data[self.macd.signal_name])\
-                        .rolling(self.buffer).apply(buffer_all).fillna(0).astype(bool)
+                        .rolling(self.buffer).apply(self.buffer_all).fillna(0).astype(bool)
                        
             cross_sell_sig = (self.data[self.macd.macd_name].shift(self.buffer) >=
                               self.data[self.macd.signal_name].shift(self.buffer-1))
@@ -85,12 +86,12 @@ class Macd_Strategy(strategy.BaseStrategy):
         elif self.method == self.Method.ZERO_CROSSOVER:
             #Buy if MACD goes from negative to postive. Sell otherwise
             buy_sig = (self.data[self.macd.macd_name] > 0)\
-                       .rolling(self.buffer).apply(buffer_all).fillna(0).astype(bool)
+                       .rolling(self.buffer).apply(self.buffer_all).fillna(0).astype(bool)
             
             cross_buy_sig = (self.data[self.macd.macd_name].shift(self.buffer) <= 0)
 
             sell_sig = (self.data[self.macd.macd_name] < 0)\
-                        .rolling(self.buffer).apply(buffer_all).fillna(0).astype(bool)
+                        .rolling(self.buffer).apply(self.buffer_all).fillna(0).astype(bool)
             
             cross_sell_sig = (self.data[self.macd.macd_name].shift(self.buffer) >= 0)
         
@@ -101,7 +102,7 @@ class Macd_Strategy(strategy.BaseStrategy):
 
             buy_sig&= (self.data[self.macd.macd_name] >= 
                       self.data[self.macd.signal_name])\
-                      .rolling(self.buffer).apply(buffer_all).fillna(0)
+                      .rolling(self.buffer).apply(self.buffer_all).fillna(0)
             
             cross_buy_sig = (self.data[self.macd.macd_name].shift() <= 0)
             
@@ -109,7 +110,7 @@ class Macd_Strategy(strategy.BaseStrategy):
             
             sell_sig &= (self.data[self.macd.macd_name] <= 
                         self.data[self.macd.signal_name])\
-                        .rolling(self.buffer).apply(buffer_all).fillna(0).astype(bool)
+                        .rolling(self.buffer).apply(self.buffer_all).fillna(0).astype(bool)
             
             cross_sell_sig = (self.data[self.macd.macd_name].shift() >= 0)
         
@@ -143,12 +144,12 @@ class Macd_Strategy(strategy.BaseStrategy):
         return performance
 
 
-    def _find_optimum(self,range,to_modify, max_iterations=10, **kwargs):
+    def _find_optimum(self,range_to_use,to_modify, max_iterations=10, **kwargs):
         '''
         Method to find the optimum value, used in optimize_strat_params(). Not meant to be 
         called directly
 
-        :param range: the range [a,b] over which the optimization will take place. First, it calculates
+        :param range_to_use: the range_to_use [a,b] over which the optimization will take place. First, it calculates
         the middle value c = (a+b)/2, then, given a function f, calculates f(a),f(b),f(c). The value whose
         function output is the lowest is discarded and the process is repeated with the remaining numbers
         :param to_modify: string which tells the method which variable is the one to be optimized
@@ -164,8 +165,8 @@ class Macd_Strategy(strategy.BaseStrategy):
         ppo_threshold = kwargs.get('ppo_threshold', self.ppo_threshold)
         fast_slow_ratio = (26/12)
 
-        xlow, xhigh = min(range), max(range)
-        for _ in range(max_iterations):
+        xlow, xhigh = min(range_to_use), max(range_to_use)
+        for _ in trange(max_iterations):
             xmid_start = (xlow+xhigh)/2
             if round_numbers:
                 xmid = int(round(xmid_start))
@@ -186,12 +187,12 @@ class Macd_Strategy(strategy.BaseStrategy):
                 elif to_modify is None:
                     return
                 
-                macd = macd.MACD(s_ema,f_ema,signal)
+                mcd = macd.MACD(s_ema,f_ema,signal)
                 strat = strategy.macd_strategy.Macd_Strategy(self.symbol,
                                                              start=self.start,
                                                              end=self.end,
                                                              period=self.period,
-                                                             macd_object=macd,
+                                                             macd_object=mcd,
                                                              buffer=buffer,
                                                              method=self.method,
                                                              use_ppo=self.use_ppo,
@@ -201,8 +202,9 @@ class Macd_Strategy(strategy.BaseStrategy):
 
             m = min(xdict.values())
             if xdict[xmid] == m:
+                print('concavity found, breaking loop')
                 break
-            xdict = {key:value for key,value in xdict if xdict[key] != m}
+            xdict = {key:value for key,value in xdict.items() if xdict[key] != m}
             xhigh = max(xdict.keys())
             xlow = min(xdict.keys())
         
@@ -211,25 +213,25 @@ class Macd_Strategy(strategy.BaseStrategy):
             
 
     def optimize_strat_params(self,
-                              fastema_range, 
-                              signal_range,
-                              buffer_range=None,
-                              ppo_range=None,
-                              max_iterations=10 ):
+                              fastema_range_to_use, 
+                              signal_range_to_use,
+                              buffer_range_to_use=None,
+                              ppo_range_to_use=None,
+                              max_iterations=5 ):
         '''
-        Optimization method for the strategy. Uses a greedy approach through bisection.
+        Optimization method for the strategy. Uses a greedy approach through bisection. 
 
-        :param fastema_range: Mandatory range to be used for the Fast EMA optimization. The slow EMA
+        :param fastema_range_to_use: Mandatory range_to_use to be used for the Fast EMA optimization. The slow EMA
         will be calculated keeping the ratio that exists between the default values (12 and 26)
-        :param signal_range: Mandatory. Range over which the signal will be optimized
-        :param buffer_range: Optional. Range for the buffer
-        :param ppo_range: Optional. Range for the ppo threshold. Does nothing if self.use_ppo is False
+        :param signal_range_to_use: Mandatory. range_to_use over which the signal will be optimized
+        :param buffer_range_to_use: Optional. range_to_use for the buffer
+        :param ppo_range_to_use: Optional. range_to_use for the ppo threshold. Does nothing if self.use_ppo is False
         :param max_iterations: Optional. How many times to iterate through bisection. The 
         iteration loop is coded to exit if the middle value is lower than both of the extremes regardless of this
-        value. Default=10
+        value. Default=5
         '''
         results = {}
-        opt_f_ema= self.find_optimum(fastema_range, 
+        opt_f_ema= self._find_optimum(fastema_range_to_use, 
                                      to_modify='fast_ema', 
                                      fast_ema=self.macd.fastema_window)
         opt_s_ema = int(round(opt_f_ema*(26/12)))
@@ -237,25 +239,28 @@ class Macd_Strategy(strategy.BaseStrategy):
         results['Fast EMA'] = opt_f_ema
         results['Slow EMA'] = opt_s_ema
 
-        opt_signal = self._find_optimum(signal_range,
+        opt_signal = self._find_optimum(signal_range_to_use,
                                        to_modify='signal',
+                                       max_iterations = max_iterations,
                                        fast_ema=opt_f_ema,
                                        slow_ema=opt_s_ema,)
         
         results['Signal'] = opt_signal
 
-        if buffer_range is not None:
-            opt_buffer = self._find_optimum(buffer_range,
+        if buffer_range_to_use is not None:
+            opt_buffer = self._find_optimum(buffer_range_to_use,
                                             to_modify='buffer',
+                                            max_iterations = max_iterations,
                                             fast_ema=opt_f_ema,
                                             slow_ema=opt_s_ema,
                                             signal=opt_signal)              
             results['Buffer'] = opt_buffer
         
-        if ppo_range is not None and self.use_ppo:
+        if ppo_range_to_use is not None and self.use_ppo:
             use_buffer = results['Buffer'] if 'Buffer' in results.keys() else self.buffer
-            opt_ppo = self._find_optimum(ppo_range,
+            opt_ppo = self._find_optimum(ppo_range_to_use,
                                          to_modify='ppo',
+                                         max_iterations = max_iterations,
                                          fast_ema=opt_f_ema,
                                          slow_ema=opt_s_ema,
                                          signal=opt_signal,

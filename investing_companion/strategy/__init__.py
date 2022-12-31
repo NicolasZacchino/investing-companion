@@ -36,7 +36,11 @@ class BaseStrategy(ABC):
         self.data['daily_returns'] = np.log(self.data['Close']/self.data['Close'].shift(1))
         self.data['bnh_returns'] = self.data['daily_returns'].cumsum()
         self.data.dropna(inplace=True)
-
+    
+    @staticmethod
+    def buffer_all(i):
+        '''Function used to check for a condition over all the elements in the buffer'''
+        return i.all()
 
     @abstractmethod
     def backtest_strategy(self):
