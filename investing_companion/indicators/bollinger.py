@@ -26,8 +26,8 @@ class BollingerBands(indicators.IndicatorBase):
 
 
     def set_column_names(self):
-        self.upper_column_name = f'BB_Upper{(self.window_size, self.std_deviations)}'
-        self.lower_column_name = f'BB_Lower{(self.window_size,self.std_deviations)}'
+        self.upper_band_name = f'BB_Upper{(self.window_size, self.std_deviations)}'
+        self.lower_band_name = f'BB_Lower{(self.window_size,self.std_deviations)}'
 
     
     def build_df(self, base_df):
@@ -36,7 +36,7 @@ class BollingerBands(indicators.IndicatorBase):
         upper_band = sma + stdev*self.std_deviations
         lower_band = sma - stdev*self.std_deviations
 
-        df = pd.DataFrame({self.upper_column_name: upper_band,
-                           self.lower_column_name: lower_band,})
+        df = pd.DataFrame({self.upper_band_name: upper_band,
+                           self.lower_band_name: lower_band,})
 
         return df

@@ -59,8 +59,6 @@ class Macd_Strategy(strategy.BaseStrategy):
         
 
     def backtest_strategy(self, start=None):
-        # def buffer_all(i):
-        #     return i.all()
         
         if start is None:
             start = max([self.macd.slowema_window, self.macd.signal_window])
