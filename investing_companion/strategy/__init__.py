@@ -3,7 +3,8 @@ import yfinance as yf
 from abc import ABC, abstractmethod
 
 class BaseStrategy(ABC):
-    '''Base class for strategy implementation
+    '''Base class for strategy implementation. S
+    Shouldn't be instantiated directly.
     :param symbol(str): The ticker symbol, passed as a string
     :param start(str): the start date from which the dataframe will be built. Default=None
     :param end(str): the end date from which the dataframe will be built. Default=None
@@ -13,6 +14,10 @@ class BaseStrategy(ABC):
     Methods
     :retrieve_data()
     :prepare_data()
+    :get_signal_column()
+    :get_performance()
+    :buffer_all() [static]
+    :create_conditions() [Abstract]
     :backtest_strategy() [Abstract]
     :optimize_indic_parameters()[Abstract]
     '''
@@ -37,17 +42,41 @@ class BaseStrategy(ABC):
         self.data['bnh_returns'] = self.data['daily_returns'].cumsum()
         self.data.dropna(inplace=True)
     
+
+    def get_signal_column(self,buy_cond,sell_cond):
+        return np.select([buy_cond, sell_cond],[1, -1], 0)
+    
+
+    def get_performance(self, start=None):
+        self.data['position'] = self.data['signal'].replace(to_replace=0, method='ffill')
+        self.data['position'] = self.data['position'].shift()
+        self.data['strat_returns'] = self.data['position'] * self.data['daily_returns']
+
+        performance = self.data[['daily_returns','strat_returns']]\
+                                .iloc[start:].sum()
+            
+        self.data['strat_returns'] = self.data['strat_returns'].cumsum()
+        return performance
+
+
     @staticmethod
     def buffer_all(i):
         '''Function used to check for a condition over all the elements in the buffer'''
         return i.all()
 
+
     @abstractmethod
-    def backtest_strategy(self):
-        pass
+    def create_conditions(self):
+        raise NotImplementedError()
+
 
     @abstractmethod
     def optimize_strat_params(self):
-        pass
+        raise NotImplementedError()
+    
+
+    @abstractmethod
+    def backtest_strategy(self):
+        raise NotImplementedError()
 
 

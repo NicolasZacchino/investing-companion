@@ -23,7 +23,9 @@ class Macd_Strategy(strategy.BaseStrategy):
     :param ppo_threshold(float): the threshold that will be used for any method that uses the ppo. Default=2.5
 
     Methods:
+    :create_conditions()
     :backtest_strategy()
+    :_find_optimum()
     :optimize_indic_params()
     '''
     class Method(Enum):
@@ -56,13 +58,9 @@ class Macd_Strategy(strategy.BaseStrategy):
         self.buffer = buffer
         self.method = method
         self.data = pd.concat([self.data, self.macd.build_df(self.data)], axis=1)
-        
+        self.create_conditions()
 
-    def backtest_strategy(self, start=None):
-        
-        if start is None:
-            start = max([self.macd.slowema_window, self.macd.signal_window])
-        
+    def create_conditions(self):    
         if self.method == self.Method.SIGNAL_CROSSOVER:
         #buy if macd>signal for self.buffer periods. Sell if the opposite happens
         #In all cases we check if a crossing has happened with .shift()
@@ -125,22 +123,15 @@ class Macd_Strategy(strategy.BaseStrategy):
                 buy_sig |= (self.data[self.macd.ppo_name]) >= self.ppo_threshold
                 sell_sig |= (self.data[self.macd.ppo_name]) <= np.negative(self.ppo_threshold)
 
-        buy_cond = buy_sig & cross_buy_sig
-        sell_cond = sell_sig & cross_sell_sig
+        self.buy_cond = buy_sig & cross_buy_sig
+        self.sell_cond = sell_sig & cross_sell_sig
 
-        self.data['signal'] =np.select([buy_cond, sell_cond],[1, -1], 0)
 
-        self.data['position'] = self.data['signal'].replace(to_replace=0, method='ffill')
-        self.data['position'] = self.data['position'].shift()
-        self.data['strat_returns'] = self.data['position'] * self.data['daily_returns']
-
-        performance = self.data[['daily_returns','strat_returns']]\
-                                .iloc[start:].sum()
-            
-        self.data['strat_returns'] = self.data['strat_returns'].cumsum()
+    def backtest_strategy(self):
+        start = max([self.macd.slowema_window, self.macd.signal_window])
+        self.data['signal'] = self.get_signal_column(self.buy_cond, self.sell_cond)
+        return self.get_performance(start=start)
         
-        return performance
-
 
     def _find_optimum(self,range_to_use,to_modify, max_iterations=10, **kwargs):
         '''

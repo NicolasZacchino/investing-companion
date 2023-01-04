@@ -11,12 +11,4 @@ max_iter = 20
 n = 20
 strat = macd_strategy.Macd_Strategy(symbol,method=method,ppo_threshold=2.5, use_ppo=True)
 
-perf = strat.backtest_strategy()
-print(perf)
-
-
-fastema_range = [8,20]
-signal_range = [6, 12]
-ppo_range = [1,5]
-
         
