@@ -111,6 +111,7 @@ class Macd_Strategy(strategy.BaseStrategy):
             cross_sell_sig = (self.data[self.macd.macd_name].shift() >= 0)
         
         elif self.method == self.Method.PPO_ONLY:
+            #Buy if the price reaches the upper PPO Threshold. Sell if it reaches the lower one.
             buy_sig = (self.data[self.macd.ppo_name]) >= self.ppo_threshold
             cross_buy_sig = (self.data[self.macd.ppo_name].shift(self.buffer) <
                             self.ppo_threshold)
@@ -133,7 +134,7 @@ class Macd_Strategy(strategy.BaseStrategy):
         return self.get_performance(start=start)
         
 
-    def _find_optimum(self,range_to_use,to_modify, max_iterations=10, **kwargs):
+    def _find_optimum(self,range_to_use,to_modify, max_iterations=5, **kwargs):
         '''
         Method to find the optimum value, used in optimize_strat_params(). Not meant to be 
         called directly
@@ -208,7 +209,10 @@ class Macd_Strategy(strategy.BaseStrategy):
                               ppo_range_to_use=None,
                               max_iterations=5 ):
         '''
-        Optimization method for the strategy. Uses a greedy approach through bisection. 
+        Optimization method for the strategy. Uses a greedy approach through bisection.
+        Optimizes the parameters in the following sequence: Slow and Fast EMA, Signal, Buffer, PPO.
+        Quite a few concessions are made to make the method finish in a reasonable amount of time, so 
+        it is not likely at all to find the global optimum.
 
         :param fastema_range_to_use: Mandatory range_to_use to be used for the Fast EMA optimization. The slow EMA
         will be calculated keeping the ratio that exists between the default values (12 and 26)
@@ -220,40 +224,32 @@ class Macd_Strategy(strategy.BaseStrategy):
         value. Default=5
         '''
         results = {}
-        opt_f_ema= self._find_optimum(fastema_range_to_use, 
-                                     to_modify='fast_ema', 
-                                     fast_ema=self.macd.fastema_window)
-        opt_s_ema = int(round(opt_f_ema*(26/12)))
+        results['Fast EMA'] = self._find_optimum(fastema_range_to_use, 
+                                                 to_modify='fast_ema')
+        results['Slow EMA'] = int(round(results['Fast EMA']*(26/12)))
        
-        results['Fast EMA'] = opt_f_ema
-        results['Slow EMA'] = opt_s_ema
-
-        opt_signal = self._find_optimum(signal_range_to_use,
-                                       to_modify='signal',
-                                       max_iterations = max_iterations,
-                                       fast_ema=opt_f_ema,
-                                       slow_ema=opt_s_ema,)
-        
-        results['Signal'] = opt_signal
+        results['Signal'] = self._find_optimum(signal_range_to_use,
+                                               to_modify='signal',
+                                               max_iterations = max_iterations,
+                                               fast_ema=results['Fast EMA'],
+                                               slow_ema= results['Slow EMA'],)
 
         if buffer_range_to_use is not None:
-            opt_buffer = self._find_optimum(buffer_range_to_use,
-                                            to_modify='buffer',
-                                            max_iterations = max_iterations,
-                                            fast_ema=opt_f_ema,
-                                            slow_ema=opt_s_ema,
-                                            signal=opt_signal)              
-            results['Buffer'] = opt_buffer
+            results['Buffer'] = self._find_optimum(buffer_range_to_use,
+                                                   to_modify='buffer',
+                                                   max_iterations = max_iterations,
+                                                   fast_ema=results['Fast EMA'],
+                                                   slow_ema=results['Slow EMA'],
+                                                   signal=results['Signal'])              
         
         if ppo_range_to_use is not None and self.use_ppo:
             use_buffer = results['Buffer'] if 'Buffer' in results.keys() else self.buffer
-            opt_ppo = self._find_optimum(ppo_range_to_use,
-                                         to_modify='ppo',
-                                         max_iterations = max_iterations,
-                                         fast_ema=opt_f_ema,
-                                         slow_ema=opt_s_ema,
-                                         signal=opt_signal,
-                                         buffer=use_buffer)
-            results['PPO'] = opt_ppo
-
+            results['PPO'] = self._find_optimum(ppo_range_to_use,
+                                                to_modify='ppo',
+                                                max_iterations = max_iterations,
+                                                fast_ema=results['Fast EMA'],
+                                                slow_ema=results['Slow EMA'],
+                                                signal=results['Signal'],
+                                                buffer=use_buffer)
+           
         return results

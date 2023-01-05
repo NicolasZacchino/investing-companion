@@ -5,15 +5,17 @@ class SimpleMovingAverage(indicators.IndicatorBase):
     '''
     The Class used to calculate the SMA indicator. Inherits from IndicatorBase.
 
-    :param: window_size(int): the window size for the SMA. Default=50
-    :param tag(str): dentifier name for the instance. Not to be confused with the column names
-    :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
-    
     Methods:
     :set_column_names()
     :build_df()
     '''
     def __init__(self, window_size=50,price_point='Close', tag='SMA'):
+        '''
+        Class constructor. Calls set_column_names after initialising attributes.
+        :param: window_size(int): the window size for the RSI. Default=14
+        :param tag(str): dentifier name for the instance. Not to be confused with the column names
+        :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
+        '''
         super().__init__(price_point,tag)
         self.window_size=window_size
         self.set_column_names()
@@ -38,14 +40,17 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
     '''
     The Class used to calculate the EMA indicator. Inherits from IndicatorBase.
 
-    :param: window_size(int): the window size for the SMA. Default=20
-    :param tag(str): dentifier name for the instance. Not to be confused with the column names
-
     Methods:
     :set_column_names()
     :build_df()
     '''
     def __init__(self,window_size=20,price_point='Close', tag='EMA'):
+        '''
+        Class constructor. Calls set_column_names after initialising attributes.
+        :param: window_size(int): the window size for the SMA. Default=20
+        :param tag(str): dentifier name for the instance. Not to be confused with the column names
+
+        '''
         super().__init__(price_point,tag)
         self.window_size = window_size
         self.set_column_names()

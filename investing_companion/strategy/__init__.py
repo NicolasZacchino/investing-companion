@@ -5,12 +5,7 @@ from abc import ABC, abstractmethod
 class BaseStrategy(ABC):
     '''Base class for strategy implementation. S
     Shouldn't be instantiated directly.
-    :param symbol(str): The ticker symbol, passed as a string
-    :param start(str): the start date from which the dataframe will be built. Default=None
-    :param end(str): the end date from which the dataframe will be built. Default=None
-    :param period(str): the time period from which the dataframe will be built. Used if start or end are not set.
-    default = 'max'
-    
+      
     Methods
     :retrieve_data()
     :prepare_data()
@@ -22,6 +17,14 @@ class BaseStrategy(ABC):
     :optimize_indic_parameters()[Abstract]
     '''
     def __init__(self, symbol, start=None, end=None, period='max'):
+        '''
+        Class constructor
+        :param symbol(str): The ticker symbol, passed as a string
+        :param start(str): the start date from which the dataframe will be built. Default=None
+        :param end(str): the end date from which the dataframe will be built. Default=None
+        :param period(str): the time period from which the dataframe will be built. Used if start or end are not set.
+        default = 'max'
+        '''
         self.symbol = symbol
         self.period = period
         self.start = start
@@ -63,7 +66,10 @@ class BaseStrategy(ABC):
     def buffer_all(i):
         '''Function used to check for a condition over all the elements in the buffer'''
         return i.all()
-
+    
+    @staticmethod
+    def buffer_any(i):
+        return i.any()
 
     @abstractmethod
     def create_conditions(self):

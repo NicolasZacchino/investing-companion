@@ -4,17 +4,19 @@ import pandas as pd
 class RelativeStrengthIndex(indicators.IndicatorBase):
     '''
     The Class used to calculate the RSI indicator. Inherits from IndicatorBase.
-
-    :param: window_size(int): the window size for the RSI. Default=14
-    :param tag(str): dentifier name for the instance. Not to be confused with the column names
-    :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
-    
+  
     Methods:
     :rsi()
     :set_column_names()
     :build_df()
     '''
     def __init__(self, window_size=14, price_point='Close', tag='RSI'):
+        ''' 
+        Class constructor. Calls set_column_names after initializing attributes.
+        :param: window_size(int): the window size for the RSI. Default=14
+        :param tag(str): dentifier name for the instance. Not to be confused with the column names
+        :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
+        '''
         super().__init__(price_point,tag)
         self.window_size = window_size
         self.set_column_names()

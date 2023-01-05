@@ -9,6 +9,3 @@ method = macd_strategy.Macd_Strategy.Method.PPO_ONLY
 interval = [1,6]
 max_iter = 20
 n = 20
-strat = macd_strategy.Macd_Strategy(symbol,method=method,ppo_threshold=2.5, use_ppo=True)
-
-        

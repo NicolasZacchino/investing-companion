@@ -5,12 +5,6 @@ class MACD(indicators.IndicatorBase):
     '''
     The Class used to calculate the MACD indicator. Inherits from IndicatorBase.
 
-    :param: slowema_window(int): the window size for the slow EMA. Default=26
-    :param: fastema_window(int): the window size for the fast EMA. Default=12
-    :param signal_window(int): the window size for the signal line. Default=9
-    :param tag(str): dentifier name for the instance. Not to be confused with the column names
-    :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
-    
     Methods:
     :build_df()
     :set_column_names()
@@ -22,6 +16,15 @@ class MACD(indicators.IndicatorBase):
                  price_point='Close',
                  tag='MACD',
                  ):
+        '''
+        Class constructor.Calls set_column_names after initializing attributes.
+
+        :param: slowema_window(int): the window size for the slow EMA. Default=26
+        :param: fastema_window(int): the window size for the fast EMA. Default=12
+        :param signal_window(int): the window size for the signal line. Default=9
+        :param tag(str): dentifier name for the instance. Not to be confused with the column names
+        :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
+        '''
         super().__init__(price_point,tag)
         self.slowema_window = slowema_window
         self.fastema_window = fastema_window
@@ -61,7 +64,6 @@ class MACD(indicators.IndicatorBase):
                            self.ppo_name : ppo_value,
                            self.signal_name: signal_line, 
                            self.histogram_name: macd_line-signal_line})
-        
         return df
 
         

@@ -5,16 +5,19 @@ class BollingerBands(indicators.IndicatorBase):
     '''
     Class for the Bollinger bands indicator. Inherits from IndicatorBase
 
-    :param window_size(int): the size of the window used in the SMA calculation. Default=20
-    :param std_deviations(int): The amount of standard deviations used to determine the bands. Default=2
-    :param tag(str): Identifier name for the instance. Not to be confused with the column names
-    :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
-    
     Methods:
     :set_column_names()
     :build_df()
     '''
     def __init__(self, window_size = 20, std_deviations=2, price_point='Close', tag='Boll_Bands'):
+        '''
+        Class constructor. Calls set_column_names after initializing attributes.
+
+        :param window_size(int): the size of the window used in the SMA calculation. Default=20
+        :param std_deviations(int): The amount of standard deviations used to determine the bands. Default=2
+        :param tag(str): Identifier name for the instance. Not to be confused with the column names
+        :param price_point(str): The price point (Open, Close, High, etc) from which to calculate the indicator
+        '''
         super().__init__(price_point,tag)
         self.window_size = window_size
         self.std_deviations = std_deviations
