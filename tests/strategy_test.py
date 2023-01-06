@@ -9,3 +9,4 @@ method = macd_strategy.Macd_Strategy.Method.PPO_ONLY
 interval = [1,6]
 max_iter = 20
 n = 20
+

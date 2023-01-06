@@ -10,7 +10,7 @@ class RelativeStrengthIndex(indicators.IndicatorBase):
     :set_column_names()
     :build_df()
     '''
-    def __init__(self, window_size=14, price_point='Close', tag='RSI'):
+    def __init__(self, window_size=14,price_point='Close', tag='RSI'):
         ''' 
         Class constructor. Calls set_column_names after initializing attributes.
         :param: window_size(int): the window size for the RSI. Default=14

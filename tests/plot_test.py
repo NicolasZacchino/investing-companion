@@ -5,28 +5,18 @@ import numpy as np
 from investing_companion import indicators
 from investing_companion.indicators import moving_averages, macd, bollinger, rsi
 
-# tsla = ticker.TickerAdditionalPricepoints('TSLA')
-# history = tsla.history('max')
-# print(history['Close'])
+tsla = yf.Ticker('TSLA')
+hist = tsla.history('max')
+rel = rsi.RelativeStrengthIndex()
+df = rel.build_df(hist)
 
-class Parent():
-    def __init__(self):
-        pass
+uptrend_range = [40,90]
+downtrend_range = [10,60]
 
-    def broadcast(self):
-        print(self.to_print)
+uptrend = df[rel.rsi_name].between(uptrend_range[0],uptrend_range[1])
+downtrend = df[rel.rsi_name].between(downtrend_range[0],downtrend_range[1])
 
-    def change_to_print(self,new_string):
-        self.to_print = new_string
+df['zone'] = np.select([uptrend&downtrend, uptrend, downtrend],[0,1,-1], default=0)
+df['trend'] = df['zone'].replace(to_replace=0, method='ffill')       
 
-class Child(Parent):
-    def __init__(self, to_print='Hello world'):
-        super().__init__()
-        self.to_print = to_print
-
-
-a = Parent()
-a.broadcast()
-a.change_to_print('a')
-a.broadcast()
-        
+print(df.to_string())
