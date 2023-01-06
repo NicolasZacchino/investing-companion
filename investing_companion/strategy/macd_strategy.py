@@ -7,21 +7,6 @@ from tqdm import tqdm, trange
 
 class Macd_Strategy(strategy.BaseStrategy):
     '''MACD-based strategy class. Inherits from BaseStrategy
-
-    :param symbol(str): The ticker symbol, passed as a string
-    :param start(str): the start date from which the dataframe will be built. Default=None
-    :param end(str): the end date from which the dataframe will be built. Default=None
-    :param period(str): the time period from which the dataframe will be built. Used if start or end are not set.
-    default = 'max'
-    :param macd_object(indicators.macd.MACD) = the macd indicator object to be used in the strategy. Defaults to a macd object
-    with default parameters
-    :param buffer(int): the amount of days a condition needs to hold true in order to raise a signal.
-    see the Method nested class for further explanation. Default=1
-    :param method(Method Enum): Which method will be used in the strategy. Default= SIGNAL_CROSSOVER
-    :param use_ppo(bool): If True, the strategy also considers a buy/sell signal if the PPO reaches a threshold.
-    default = False. (Note that the PPO is always used for the PPO_ONLY method)
-    :param ppo_threshold(float): the threshold that will be used for any method that uses the ppo. Default=2.5
-
     Methods:
     :create_conditions()
     :backtest_strategy()
@@ -51,6 +36,23 @@ class Macd_Strategy(strategy.BaseStrategy):
     def __init__(self, symbol, start=None, end=None, period='max', 
                 macd_object = macd.MACD(), buffer=1, method = Method.SIGNAL_CROSSOVER,
                 use_ppo=False, ppo_threshold=2.5):
+        """Class constructor
+
+        Args:
+             symbol (string): The ticker to be used
+            start (string, optional): start date for the retrieval of the data from symbol. Defaults to None.
+            end (string, optional): end date for the retrieval of the data. Defaults to None.
+            period (str, optional): time period (ie '1y') used. Defaults to 'max'
+            macd_object (macd.MACD(), optional): macd object to be used. Defaults to an object with all 
+            default values
+            buffer (int, optional): How many days should a condition hold true for a signal to be
+            emitted. Defaults to 1.
+            method (Method(enum), optional): Method to use. Defaults to Method.SIGNAL_CROSSOVER.
+            use_ppo (bool, optional): whether to take into account the ppo for buy 
+            and sell signals. Defaults to False.
+            ppo_threshold (float, optional): the ppo value to take into account. Does 
+            nothing if use_ppo is False and the method is not PPO_ONLY. Defaults to 2.5.
+        """        
         super().__init__(symbol, start, end, period)
         self.macd = macd_object
         self.use_ppo = use_ppo
