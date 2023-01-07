@@ -2,7 +2,7 @@ from investing_companion.indicators import bollinger
 from investing_companion import strategy
 import pandas as pd
 import numpy as np
-from enum import enum, auto
+from enum import Enum, auto
 
 class Bollinger_Strategy(strategy.BaseStrategy):
     '''

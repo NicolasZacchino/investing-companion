@@ -2,7 +2,7 @@ from investing_companion.indicators import rsi
 from investing_companion import strategy
 import pandas as pd
 import numpy as np
-from enum import enum, auto
+from enum import Enum, auto
 
 class RSI_Strategy(strategy.BaseStrategy):
     '''
@@ -15,7 +15,7 @@ class RSI_Strategy(strategy.BaseStrategy):
     optimize_strat_params()
     create_trend_columns()
     '''
-    class Method(enum):
+    class Method(Enum):
         DEFAULT = auto()
         TREND_RANGES = auto()
         TREND_RANGES_SAFE = auto()
@@ -78,7 +78,7 @@ class RSI_Strategy(strategy.BaseStrategy):
         df = pd.DataFame()
         uptrend = self.data[self.rel_str.rsi_name] >= self.uptrend_start
         downtrend = self.data[self.rel_str.rsi_name] <= self.downtrend_start
-        df['zone'] = np.select([uptrend&downtrend, uptrend, downtrend],[0,1,-1], default=0)
+        df['zone'] = np.select([uptrend&downtrend, uptrend, downtrend],[0,1,-1], 0)
         df['trend'] = df['zone'].replace(to_replace=0, method='ffill')
 
         return df['trend']
@@ -125,7 +125,6 @@ class RSI_Strategy(strategy.BaseStrategy):
                            .astype(bool)
 
                 cross_buy_sig |= (self.data['trend'].shift(self.buffer)).eq(-1)
-            return
 
         self.buy_cond = buy_sig & cross_buy_sig
         self.sell_cond = sell_sig & cross_sell_sig

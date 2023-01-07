@@ -26,13 +26,13 @@ class SimpleMovingAverage(indicators.IndicatorBase):
 
 
     def set_column_names(self):
-        self.sma_name = f'SMA({self.window_size})'
+        self.ma_name = f'SMA({self.window_size})'
 
 
     def build_df(self, base_df, price_point='Close'): 
-        df = pd.DataFrame({self.sma_name: base_df[price_point].rolling(self.window_size, 
-                                                                       min_periods=self.window_size)
-                                                                       .mean()})
+        df = pd.DataFrame({self.ma_name: base_df[price_point].rolling(self.window_size, 
+                                                                      min_periods=self.window_size)
+                                                                      .mean()})
         return df
 
 
@@ -49,7 +49,6 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
         Class constructor. Calls set_column_names after initialising attributes.
         :param: window_size(int): the window size for the SMA. Default=20
         :param tag(str): dentifier name for the instance. Not to be confused with the column names
-
         '''
         super().__init__(price_point,tag)
         self.window_size = window_size
@@ -61,11 +60,11 @@ class ExponentialMovingAverage(indicators.IndicatorBase):
 
 
     def set_column_names(self):
-        self.ema_name = f'EMA({self.window_size})'
+        self.ma_name = f'EMA({self.window_size})'
 
 
     def build_df(self, base_df):
-        df = pd.DataFrame({self.ema_name: base_df[self.price_point].ewm(span = self.window_size, 
-                                                                        min_periods=self.window_size, 
-                                                                        adjust=False).mean()})
+        df = pd.DataFrame({self.ma_name: base_df[self.price_point].ewm(span = self.window_size, 
+                                                                       min_periods=self.window_size, 
+                                                                       adjust=False).mean()})
         return df
