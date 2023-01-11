@@ -20,7 +20,7 @@ class Ma_Strategy(strategy.BaseStrategy):
         self.ma_names = [m.ma_name for m in self.ma_objs]
         self.buffer = buffer
         self.method = method
-        self.data = pd.concat([self.data, *[m.build_df(self.symbol) for m in self.ma_objs]], axis=1)
+        self.data = pd.concat([self.data, *[m.build_df(self.data) for m in self.ma_objs]], axis=1)
         self.create_conditions()
 
 
@@ -30,21 +30,21 @@ class Ma_Strategy(strategy.BaseStrategy):
             #the slower ones below. Sell when this stops being True
             dif = np.sign(self.data[self.ma_names].diff(-1, axis='columns')).iloc[:,:-1]
 
-            buy_sig = dif.eq(1).all(axis='columns').rolling(self.buffer).apply(buffer_all)\
+            buy_sig = dif.eq(1).all(axis='columns').rolling(self.buffer).apply(self.buffer_all)\
                       .fillna(0).astype(bool)
             cross_buy_sig = dif.shift(self.buffer).ne(1).any(axis='columns').fillna(0).astype(bool)
 
-            sell_sig = dif.eq(-1).all(axis='columns').rolling(self.buffer).apply(buffer_all)\
+            sell_sig = dif.eq(-1).all(axis='columns').rolling(self.buffer).apply(self.buffer_all)\
                        .fillna(0).astype(bool)
             cross_sell_sig = dif.shift(self.buffer).ne(-1).any(axis='columns').fillna(0).astype(bool)
         
-        if self.method == self.Method().PRICE_CROSSOVER:
+        if self.method == self.Method.PRICE_CROSSOVER:
             #buy the moment the price is above all the provided indicators. Sell otherwise
-            buy_sig = (self.data.idxmax(axis=1) == 'Close').rolling(self.buffer).apply(buffer_all)\
+            buy_sig = (self.data.idxmax(axis=1) == 'Close').rolling(self.buffer).apply(self.buffer_all)\
                       .fillna(0).astype(bool)
             cross_buy_sig = (self.data.shift(self.buffer).idxmin(axis=1) == 'Close').fillna(0).astype(bool)
 
-            sell_sig = (self.data.idxmin(axis=1) == 'Close').rolling(self.buffer).apply(buffer_all)\
+            sell_sig = (self.data.idxmin(axis=1) == 'Close').rolling(self.buffer).apply(self.buffer_all)\
                         .fillna(0).astype(bool)
             cross_sell_sig = (self.data.shift(self.buffer).idxmax(axis=1) == 'Close').fillna(0).astype(bool)
 
@@ -55,7 +55,7 @@ class Ma_Strategy(strategy.BaseStrategy):
     def backtest_strategy(self):
         start = max(self.ma_objs, key=lambda x: x.window_size)
         self.data['signal'] = self.get_signal_column(self.buy_cond,self.sell_cond)
-        return self.get_performance(start=start)
+        return self._get_performance(start=start.window_size)
 
 
     def optimize_strat_params(self):

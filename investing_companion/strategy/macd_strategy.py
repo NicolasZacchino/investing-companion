@@ -133,7 +133,7 @@ class Macd_Strategy(strategy.BaseStrategy):
     def backtest_strategy(self):
         start = max([self.macd.slowema_window, self.macd.signal_window])
         self.data['signal'] = self.get_signal_column(self.buy_cond, self.sell_cond)
-        return self.get_performance(start=start)
+        return self._get_performance(start=start)
         
 
     def _find_optimum(self,range_to_use,to_modify, max_iterations=5, **kwargs):

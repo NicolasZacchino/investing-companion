@@ -10,7 +10,7 @@ class BaseStrategy(ABC):
     :retrieve_data()
     :prepare_data()
     :get_signal_column()
-    :get_performance()
+    :_get_performance()
     :buffer_all() [static]
     :create_conditions() [Abstract]
     :backtest_strategy() [Abstract]
@@ -50,7 +50,7 @@ class BaseStrategy(ABC):
         return np.select([buy_cond, sell_cond],[1, -1], 0)
     
 
-    def get_performance(self, start=None):
+    def _get_performance(self, start=None):
         self.data['position'] = self.data['signal'].replace(to_replace=0, method='ffill')
         self.data['position'] = self.data['position'].shift()
         self.data['strat_returns'] = self.data['position'] * self.data['daily_returns']

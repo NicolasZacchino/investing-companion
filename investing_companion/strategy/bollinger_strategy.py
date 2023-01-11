@@ -46,7 +46,7 @@ class Bollinger_Strategy(strategy.BaseStrategy):
     
 
     def create_conditions(self):
-        if self.method == Method.BAND_CROSSOVER_SIMPLE:
+        if self.method == self.Method.BAND_CROSSOVER_SIMPLE:
             #Sell if the Price breaks the upper band. Buy if it breaks the upper one
             buy_sig = (self.data['Close'] < self.data[self.bol_band.lower_band_name])\
                       .rolling(self.buffer).apply(self.buffer_all).fillna(0).astype(bool)
@@ -60,7 +60,7 @@ class Bollinger_Strategy(strategy.BaseStrategy):
             cross_sell_sig = (self.data['Close'].shift(self.buffer) <= 
                              self.data[self.bol_band.upper_band_name].shift(self.buffer-1))
         
-        if self.method == Method.DOUBLE_BAND_TEST:
+        if self.method == self.Method.DOUBLE_BAND_TEST:
             #Sell if the Price breaks the upper band and has also done so in the last self.buffer periods.
             #Buy if it breaks the lower band and also broke it in the last self.buffer periods
             buy_sig = ((self.data['Close'] < self.data[self.bol_band.lower_band_name]) &\
@@ -80,7 +80,7 @@ class Bollinger_Strategy(strategy.BaseStrategy):
     def backtest_strategy(self):
         start = self.bol_band.window_size
         self.data['signal'] = self.get_signal_column(self.buy_cond, self.sell_cond)
-        return self.get_performance(start=start)
+        return self._get_performance(start=start)
 
 
     def _find_optimum(self,range_to_use,to_modify, max_iterations=5, **kwargs):

@@ -29,8 +29,8 @@ class SimpleMovingAverage(indicators.IndicatorBase):
         self.ma_name = f'SMA({self.window_size})'
 
 
-    def build_df(self, base_df, price_point='Close'): 
-        df = pd.DataFrame({self.ma_name: base_df[price_point].rolling(self.window_size, 
+    def build_df(self, base_df): 
+        df = pd.DataFrame({self.ma_name: base_df[self.price_point].rolling(self.window_size, 
                                                                       min_periods=self.window_size)
                                                                       .mean()})
         return df
