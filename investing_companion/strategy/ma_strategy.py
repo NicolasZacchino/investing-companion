@@ -4,8 +4,14 @@ from enum import Enum, auto
 import pandas as pd 
 import numpy as np
 
-
 class Ma_Strategy(strategy.BaseStrategy):
+    """MA-based strategy. Inherits from BaseStrategy
+
+    Methods:
+    create_conditions()
+    backtest_strategy()
+    optimize_strat_params() [raises NotImplementedError. see docstring]
+    """    
     class Method(Enum):
         PRICE_CROSSOVER = auto()
         IND_ORDERED = auto()
@@ -14,6 +20,20 @@ class Ma_Strategy(strategy.BaseStrategy):
                  period='max', ma_objs=None,
                  method=Method.PRICE_CROSSOVER,
                  buffer=1):
+        """Constructor for the MA-based strategy
+
+        Args:
+            symbol (String): Base Ticker to be used
+            start (string, optional): start date for the retrieval of the data from symbol. Defaults to None.
+            end (string, optional): end date for the retrieval of the data. Defaults to None.
+            period (str, optional): time period (ie '1y') used 
+            if either start or end are None. Defaults to 'max'. 
+            ma_objs (list[moving_averages], optional): list with MA objects to be used for the strategy. 
+            Defaults to None.
+            method (Method(enum), optional): Method to use. Defaults to Method.PRICE_CROSSOVER.
+            buffer (int, optional): How many days should a condition hold true for a signal to be
+            emitted. Defaults to 1.
+        """        
         super().__init__(symbol,start,end,period)
         self.ma_objs = [moving_averages.SimpleMovingAverage()] if ma_objs is None else ma_objs
         self.ma_objs.sort(key=lambda x: x.window_size)
@@ -39,17 +59,27 @@ class Ma_Strategy(strategy.BaseStrategy):
             cross_sell_sig = dif.shift(self.buffer).ne(-1).any(axis='columns').fillna(0).astype(bool)
         
         if self.method == self.Method.PRICE_CROSSOVER:
+            not_null_cond = (self.data[[*self.ma_names]].notnull()).all(axis=1)
             #buy the moment the price is above all the provided indicators. Sell otherwise
-            buy_sig = (self.data.idxmax(axis=1) == 'Close').rolling(self.buffer).apply(self.buffer_all)\
-                      .fillna(0).astype(bool)
-            cross_buy_sig = (self.data.shift(self.buffer).idxmin(axis=1) == 'Close').fillna(0).astype(bool)
+            buy_sig = (self.data[['Close', *self.ma_names]].idxmax(axis=1) == 'Close')\
+                      .rolling(self.buffer)\
+                      .apply(self.buffer_all)\
+                      .astype(bool)
+                      
 
-            sell_sig = (self.data.idxmin(axis=1) == 'Close').rolling(self.buffer).apply(self.buffer_all)\
-                        .fillna(0).astype(bool)
-            cross_sell_sig = (self.data.shift(self.buffer).idxmax(axis=1) == 'Close').fillna(0).astype(bool)
+            cross_buy_sig = (self.data[['Close', *self.ma_names]].shift(self.buffer).idxmin(axis=1) == 'Close')\
+                            .astype(bool)
 
-        self.buy_cond = buy_sig & cross_buy_sig
-        self.sell_cond = sell_sig & cross_sell_sig
+            sell_sig = (self.data[['Close', *self.ma_names]].idxmin(axis=1) == 'Close')\
+                       .rolling(self.buffer)\
+                       .apply(self.buffer_all)\
+                       .astype(bool)
+
+            cross_sell_sig = (self.data[['Close', *self.ma_names]].shift(self.buffer).idxmax(axis=1) == 'Close')\
+                             .astype(bool)
+
+        self.buy_cond = buy_sig & cross_buy_sig & not_null_cond
+        self.sell_cond = sell_sig & cross_sell_sig & not_null_cond
 
 
     def backtest_strategy(self):
